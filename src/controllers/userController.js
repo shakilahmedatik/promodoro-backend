@@ -47,6 +47,10 @@ export const loginUser = async (req, res, next) => {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password)
+    // Remove the password field before returning
+    if (user) {
+      delete user.password
+    }
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid password' })
     }
@@ -63,6 +67,7 @@ export const loginUser = async (req, res, next) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     })
+
     handleResponse(res, 201, 'Login Successful.', user)
   } catch (err) {
     next(err)
