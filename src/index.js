@@ -6,7 +6,7 @@ import redisClient from './config/redisClient.js'
 import userRoutes from './routes/userRoutes.js'
 import errorHandling from './middlewares/errorHandler.js'
 import createUserTable from './data/createUserTable.js'
-
+import cookieParser from 'cookie-parser'
 dotenv.config()
 
 const app = express()
@@ -14,10 +14,11 @@ const port = process.env.PORT || 3000
 
 // Middlewares
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors())
 
 // Routes
-app.use('/api', userRoutes)
+app.use('/api/user', userRoutes)
 
 // Error handling middleware
 app.use(errorHandling)
