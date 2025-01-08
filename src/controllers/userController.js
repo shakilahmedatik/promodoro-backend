@@ -6,6 +6,8 @@ import {
   loginUserService,
   updateUserService,
 } from '../models/userModel.js'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 // Standardized response function
 const handleResponse = (res, status, message, data = null) => {
@@ -49,10 +51,18 @@ export const loginUser = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid password' })
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
-      expiresIn: '1h',
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: '1h',
+      }
+    )
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     })
-    res.cookie('token', token, { httpOnly: true })
     handleResponse(res, 201, 'Login Successful.', user)
   } catch (err) {
     next(err)

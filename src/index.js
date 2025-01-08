@@ -15,7 +15,11 @@ const port = process.env.PORT || 3000
 // Middlewares
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors())
+const corsOptions = {
+  origin: ['http://localhost:3000'],
+  credentials: true,
+}
+app.use(cors(corsOptions))
 
 // Routes
 app.use('/api/user', userRoutes)
