@@ -51,7 +51,7 @@ export const loginUser = async (req, res, next) => {
       .cookie('token', token, {
         httpOnly: true, // Prevent client-side access
         secure: process.env.NODE_ENV === 'production', // Send only over HTTPS
-        sameSite: 'Lax', // Allow cross-site requests with proper credentials
+        sameSite: 'None', // Allow cross-site requests with proper credentials
         domain: '.promodoro-backend.onrender.com', // Set the exact domain
       })
       .send({
