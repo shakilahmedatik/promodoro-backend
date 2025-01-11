@@ -14,7 +14,7 @@ const createUserTable = async () => {
 
   try {
     await pool.query(queryText)
-    console.log('User table created if not exists')
+    console.log('users table created if not exists')
   } catch (error) {
     console.log('Error creating users table : ', error)
   }

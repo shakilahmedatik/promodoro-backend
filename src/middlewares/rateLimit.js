@@ -1,12 +1,13 @@
 import redisClient from '../config/redisClient.js'
 
 export const rateLimit = async (req, res, next) => {
-  const userId = 1 // Assume JWT middleware populates req.user
-  const cacheKey = `rate-limit:${userId}`
-
+  const user_id = req.user.id // JWT middleware populates req.user
+  const path = req?.route?.path.split('/')[1] || ''
+  const cacheKey = `rate-limit-${path}:${user_id}`
+  console.log(cacheKey)
   try {
     const current = await redisClient.incr(cacheKey)
-
+    console.log(current)
     if (current === 1) {
       // Set expiry to 1 minute for the key
       await redisClient.expire(cacheKey, 60)
@@ -23,7 +24,3 @@ export const rateLimit = async (req, res, next) => {
     res.status(500).send('Server Error')
   }
 }
-
-// app.use('/focus-metrics', authenticateJWT, rateLimit, (req, res) => {
-//     // Handler logic
-// });

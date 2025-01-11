@@ -4,8 +4,10 @@ import dotenv from 'dotenv'
 import pool from './config/db.js'
 import redisClient from './config/redisClient.js'
 import userRoutes from './routes/userRoutes.js'
+import focusSessionRoutes from './routes/focusSessionRoutes.js'
 import errorHandling from './middlewares/errorHandler.js'
 import createUserTable from './data/createUserTable.js'
+import createFocusSessionsTable from './data/createFocusSessionTable.js'
 import cookieParser from 'cookie-parser'
 dotenv.config()
 
@@ -22,13 +24,15 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 // Routes
-app.use('/api/user', userRoutes)
+app.use('/api', userRoutes)
+app.use('/api', focusSessionRoutes)
 
 // Error handling middleware
 app.use(errorHandling)
 
 //Create table before starting server
 createUserTable()
+createFocusSessionsTable()
 
 // Testing POSTGRES Connection
 app.get('/', async (req, res) => {

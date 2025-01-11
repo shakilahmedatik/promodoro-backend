@@ -1,22 +1,7 @@
-import {
-  registerUserService,
-  deleteUserService,
-  getAllUsersService,
-  getUserByIdService,
-  loginUserService,
-  updateUserService,
-} from '../models/userModel.js'
+import { registerUserService, loginUserService } from '../models/userModel.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
-// Standardized response function
-const handleResponse = (res, status, message, data = null) => {
-  res.status(status).json({
-    status,
-    message,
-    data,
-  })
-}
+import { handleResponse } from '../utils/index.js'
 
 export const registerUser = async (req, res, next) => {
   const { name, email, image, password } = req.body
@@ -73,42 +58,15 @@ export const loginUser = async (req, res, next) => {
     next(err)
   }
 }
-
-export const getAllUsers = async (req, res, next) => {
+export const logoutUser = async (req, res, next) => {
   try {
-    const users = await getAllUsersService()
-    handleResponse(res, 200, 'Users fetched successfully', users)
-  } catch (err) {
-    next(err)
-  }
-}
-
-export const getUserById = async (req, res, next) => {
-  try {
-    const user = await getUserByIdService(req.params.id)
-    if (!user) return handleResponse(res, 404, 'User not found')
-    handleResponse(res, 200, 'User fetched successfully', user)
-  } catch (err) {
-    next(err)
-  }
-}
-
-export const updateUser = async (req, res, next) => {
-  const { name, email } = req.body
-  try {
-    const updatedUser = await updateUserService(req.params.id, name, email)
-    if (!updatedUser) return handleResponse(res, 404, 'User not found')
-    handleResponse(res, 200, 'User updated successfully', updatedUser)
-  } catch (err) {
-    next(err)
-  }
-}
-
-export const deleteUser = async (req, res, next) => {
-  try {
-    const deletedUser = await deleteUserService(req.params.id)
-    if (!deletedUser) return handleResponse(res, 404, 'User not found')
-    handleResponse(res, 200, 'User deleted successfully', deleteUser)
+    // Clear the authentication cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    })
+    handleResponse(res, 200, 'Logged out successfully')
   } catch (err) {
     next(err)
   }
