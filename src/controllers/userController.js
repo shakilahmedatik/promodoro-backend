@@ -47,13 +47,20 @@ export const loginUser = async (req, res, next) => {
         expiresIn: '1h',
       }
     )
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'none',
-    })
+    res
+      .cookie('token', token, {
+        httpOnly: true, // Prevent client-side access
+        secure: process.env.NODE_ENV === 'production', // Send only over HTTPS
+        sameSite: 'Lax', // Allow cross-site requests with proper credentials
+        domain: 'https://promodoro-backend.onrender.com', // Set the exact domain
+      })
+      .send({
+        status: 200,
+        message: 'Login Successful.',
+        data: user,
+      })
 
-    handleResponse(res, 201, 'Login Successful.', user)
+    // handleResponse(res, 201, 'Login Successful.', user)
   } catch (err) {
     next(err)
   }
