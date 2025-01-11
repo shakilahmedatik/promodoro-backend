@@ -3,7 +3,7 @@ import pool from '../config/db.js'
 export const saveFocusSessionService = async (user_id, duration, timestamp) => {
   const result = await pool.query(
     `INSERT INTO focus_sessions (user_id, duration, timestamp)
-         VALUES ($1, $2, $3)`,
+         VALUES ($1, $2, to_timestamp($3, 'YYYY-MM-DD'))`,
     [user_id, duration, timestamp]
   )
   return result.rowCount // Number of rows inserted
