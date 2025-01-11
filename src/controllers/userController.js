@@ -52,7 +52,7 @@ export const loginUser = async (req, res, next) => {
         httpOnly: true, // Prevent client-side access
         secure: process.env.NODE_ENV === 'production', // Send only over HTTPS
         sameSite: 'Lax', // Allow cross-site requests with proper credentials
-        domain: 'https://promodoro-backend.onrender.com', // Set the exact domain
+        domain: '.promodoro-backend.onrender.com', // Set the exact domain
       })
       .send({
         status: 200,
