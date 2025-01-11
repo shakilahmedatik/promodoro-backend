@@ -69,9 +69,10 @@ export const logoutUser = async (req, res, next) => {
   try {
     // Clear the authentication cookie
     res.clearCookie('token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      httpOnly: true, // Prevent client-side access
+      secure: true, // Send only over HTTPS
+      sameSite: 'None', // Allow cross-site requests with proper credentials
+      domain: '.promodoro-backend.onrender.com', // Set the exact domain
     })
     handleResponse(res, 200, 'Logged out successfully')
   } catch (err) {
