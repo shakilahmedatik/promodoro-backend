@@ -8,13 +8,13 @@ const userSchema = Joi.object({
     'any.required': 'Image is required.',
   }),
   password: Joi.string()
-    .min(8)
-    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])'))
+    .min(6)
+    .pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*\\d)'))
     .required()
     .messages({
-      'string.min': 'Password must be at least 8 characters long.',
+      'string.min': 'Password must be at least 6 characters long.',
       'string.pattern.base':
-        'Password must include at least one uppercase letter, one lowercase letter, one digit, and one special character.',
+        'Password must include at least one letter and one number.',
       'any.required': 'Password is required.',
     }),
 })
