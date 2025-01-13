@@ -5,14 +5,17 @@ import pool from './config/db.js'
 import redisClient from './config/redisClient.js'
 import userRoutes from './routes/userRoutes.js'
 import focusSessionRoutes from './routes/focusSessionRoutes.js'
-import errorHandling from './middlewares/errorHandler.js'
-import createUserTable from './data/createUserTable.js'
-import createFocusSessionsTable from './data/createFocusSessionTable.js'
+import createUserTable from './models/createUserTable.js'
+import createFocusSessionsTable from './models/createFocusSessionTable.js'
 import cookieParser from 'cookie-parser'
+import { logger } from './middlewares/winstonLogger.js'
+import { httpRequestDuration } from './middlewares/prometheusLogger.js'
+import { register } from 'prom-client'
 dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 3000
+// Define Metrics
 
 // Middlewares
 const corsOptions = {
@@ -22,13 +25,43 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
+// Middleware to log requests
+app.use((req, res, next) => {
+  logger.info({ method: req.method, url: req.url })
+  next()
+})
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  logger.error({ message: err.message, stack: err.stack })
+  res.status(500).send('Internal Server Error')
+})
+// Middleware to track request duration
+app.use((req, res, next) => {
+  const end = httpRequestDuration.startTimer() // Start the timer
+  res.on('finish', () => {
+    end({
+      method: req.method,
+      route: req.route?.path || req.path,
+      status: res.statusCode,
+    })
+  })
+  next()
+})
+// Your API routes
+app.get('/api', (req, res) => {
+  res.send('Hello, Prometheus!')
+})
+
+// Endpoint to expose metrics to Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType)
+  res.end(await register.metrics())
+})
 
 // Routes
 app.use('/api', userRoutes)
 app.use('/api', focusSessionRoutes)
-
-// Error handling middleware
-app.use(errorHandling)
 
 //Create table before starting server
 createUserTable()

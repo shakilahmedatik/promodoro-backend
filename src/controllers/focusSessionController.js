@@ -3,11 +3,16 @@ import {
   calculateLongestStreakService,
   getDailyMetricsService,
   getFocusSessionLogService,
-  getLeaderboardService,
+  getLeaderboardOverallService,
   getWeeklyMetricsService,
   saveFocusSessionService,
-} from '../models/focusSessionModel.js'
-import { assignBadge, handleResponse } from '../utils/index.js'
+  getLeaderboardTodayService,
+} from '../services/focusSessionModel.js'
+import {
+  assignBadge,
+  handleResponse,
+  invalidateRedisCache,
+} from '../utils/utils.js'
 import redisClient from '../config/redisClient.js'
 
 // set focus session data
@@ -17,12 +22,11 @@ export const saveFocusSession = async (req, res, next) => {
   try {
     const response = await saveFocusSessionService(user_id, duration, timestamp)
     // Invalidate cached data
-    const focusCacheKey = `focus-metrics:${id}`
-    const leaderboardCacheKey = `leaderboard:${id}`
-    const focusLogCacheKey = `focus-log:${id}`
-    await redisClient.del(focusCacheKey) // Delete cached focus metrics for this user
-    await redisClient.del(leaderboardCacheKey) // Delete cached leaderboardCacheKey for this user
-    await redisClient.del(focusLogCacheKey) // Delete cached focusLogCacheKey for this user
+    invalidateRedisCache(id).map(async cacheKey => {
+      console.log(cacheKey)
+      return await redisClient.del(cacheKey)
+    })
+
     handleResponse(res, 201, 'Focus session logged', response)
   } catch (err) {
     next(err)
@@ -60,7 +64,8 @@ export const focusSessionLog = async (req, res, next) => {
     next(err)
   }
 }
-// get focus metrics
+
+// get daily & weekly focus metrics
 export const focusSessionMetrics = async (req, res, next) => {
   const { id, timezone } = req.user
 
@@ -104,29 +109,58 @@ export const focusSessionMetrics = async (req, res, next) => {
   }
 }
 
-//get leaderboard data
-export const leaderBoard = async (req, res, next) => {
-  const id = req.user.id
+//get leaderboard data for today
+export const leaderboardToday = async (req, res, next) => {
+  const { id, timezone } = req.user
 
   try {
-    const cacheKey = `leaderboard:${id}`
+    const cacheKey = `leaderboard-today:${id}`
     const cachedMetrics = await redisClient.get(cacheKey)
 
     if (cachedMetrics) {
       return handleResponse(
         res,
         200,
-        'LeaderBoard Data Fetched Successfully. (Cached)',
+        'LeaderBoard Today Data Fetched Successfully. (Cached)',
         JSON.parse(cachedMetrics)
       )
     }
-    const leaderBoardData = await getLeaderboardService()
+    const leaderBoardData = await getLeaderboardTodayService(timezone)
     // Cache the result for 10 minutes
     await redisClient.setEx(cacheKey, 600, JSON.stringify(leaderBoardData))
     handleResponse(
       res,
       200,
-      'LeaderBoard Data Fetched Successfully.',
+      'LeaderBoard Today Data Fetched Successfully.',
+      leaderBoardData
+    )
+  } catch (err) {
+    next(err)
+  }
+}
+//get leaderboard data for all time
+export const leaderboardOverall = async (req, res, next) => {
+  const id = req.user.id
+
+  try {
+    const cacheKey = `leaderboard-overall:${id}`
+    const cachedMetrics = await redisClient.get(cacheKey)
+
+    if (cachedMetrics) {
+      return handleResponse(
+        res,
+        200,
+        'LeaderBoard Overall Data Fetched Successfully. (Cached)',
+        JSON.parse(cachedMetrics)
+      )
+    }
+    const leaderBoardData = await getLeaderboardOverallService()
+    // Cache the result for 10 minutes
+    await redisClient.setEx(cacheKey, 600, JSON.stringify(leaderBoardData))
+    handleResponse(
+      res,
+      200,
+      'LeaderBoard Overall Data Fetched Successfully.',
       leaderBoardData
     )
   } catch (err) {

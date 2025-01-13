@@ -159,10 +159,30 @@ export const calculateLongestStreakService = async user_id => {
   return result.rows[0].longest_streak || 0
 }
 
-// get Leaderboard by total_focus_time
-export const getLeaderboardService = async () => {
+// get todays Leaderboard by total_focus_time
+export const getLeaderboardTodayService = async (timezone = 'Asia/Dhaka') => {
   const result = await pool.query(
-    `SELECT 
+    `
+         SELECT 
+        u.id AS user_id,
+        u.name AS user_name,
+        u.image AS user_image, 
+        SUM(fs.duration) AS total_focus_time,
+        RANK() OVER (ORDER BY SUM(fs.duration) DESC) AS rank
+    FROM focus_sessions fs
+    JOIN users u ON fs.user_id = u.id
+    WHERE timestamp::date = DATE(CURRENT_TIMESTAMP AT TIME ZONE $1)
+    GROUP BY u.id, u.name, u.image
+    ORDER BY rank`,
+    [timezone]
+  )
+  return result.rows
+}
+// get overall Leaderboard by total_focus_time
+export const getLeaderboardOverallService = async () => {
+  const result = await pool.query(
+    `
+    SELECT 
             u.id AS user_id,
             u.name AS user_name,
             u.image AS user_image, 
@@ -171,7 +191,8 @@ export const getLeaderboardService = async () => {
          FROM focus_sessions fs
          JOIN users u ON fs.user_id = u.id
          GROUP BY u.id, u.name, u.image
-         ORDER BY rank`
+         ORDER BY rank
+    `
   )
   return result.rows
 }

@@ -1,7 +1,10 @@
-import { registerUserService, loginUserService } from '../models/userModel.js'
+import {
+  registerUserService,
+  loginUserService,
+} from '../services/userService.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { handleResponse } from '../utils/index.js'
+import { handleResponse } from '../utils/utils.js'
 
 export const registerUser = async (req, res, next) => {
   const { name, email, image, password } = req.body
@@ -44,7 +47,7 @@ export const loginUser = async (req, res, next) => {
       { id: user.id, email: user.email },
       process.env.SECRET_KEY,
       {
-        expiresIn: '1h',
+        expiresIn: '7d',
       }
     )
     res
@@ -59,8 +62,6 @@ export const loginUser = async (req, res, next) => {
         message: 'Login Successful.',
         data: user,
       })
-
-    // handleResponse(res, 201, 'Login Successful.', user)
   } catch (err) {
     next(err)
   }
