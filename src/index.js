@@ -19,7 +19,11 @@ const port = process.env.PORT || 3000
 
 // Middlewares
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://promodoro-beta.vercel.app'],
+  origin: [
+    'http://localhost:3000',
+    'https://promodoro-beta.vercel.app',
+    'https://promodoro-app-theta.vercel.app',
+  ],
   credentials: true,
 }
 app.use(cors(corsOptions))
