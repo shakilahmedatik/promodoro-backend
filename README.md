@@ -31,7 +31,7 @@ Api requests are secured by jwt token. Except Authentication api endpoints, all 
 #### Log focus session with duration and user ID->
 
 ```http
-  	POST /focus-session
+  POST /focus-session
 ```
 
 | Body | Type     | Description                |
@@ -129,8 +129,8 @@ Api requests are secured by jwt token. Except Authentication api endpoints, all 
 	    -	id
 	    -	name
 	    -	email
-        -   hashed password
-        -   timestamp
+            -   hashed password
+            -   timestamp
 
 2. Focus Sessions Table
 	####	Logs focus sessions with the following fields:
