@@ -19,8 +19,8 @@ This repository contains the backend implementation for the Time Management and 
 - ⚠️ Express server, Postgres database & Redis database is hosted on Render(free tier).
 - ⚠️ On Render's free tier, a service will go to sleep after approximately 15 minutes of inactivity. Please keep that in mind while checking out the live demos down below:
 
-- ‼️ Base API URL - https://promodoro-app-theta.vercel.app/api
-- ‼️ Prometheus Metrics - https://promodoro-app-theta.vercel.app/metrics
+- ‼️ Base API URL - https://promodoro-backend.onrender.com
+- ‼️ Prometheus Metrics - https://promodoro-backend.onrender.com/metrics
 
 
 ![App Screenshot](https://i.ibb.co.com/xf7PDMc/render-services.png)
